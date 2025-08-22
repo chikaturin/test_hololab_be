@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { parseDeviceInfo } from '../util/device.utils';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { JwtService } from '@nestjs/jwt';
@@ -9,7 +10,6 @@ import {
   TokenRedis,
   SessionData,
 } from './interfaces/token.interface';
-import { parseDeviceInfo } from '../util/device.utils';
 
 @Injectable()
 export class TokenService {
@@ -40,10 +40,22 @@ export class TokenService {
     }
   }
 
-  async generateToken(
+  async saveTokenToRedis(
+    userId: string,
+    tokenData: TokenRedis,
+  ): Promise<string> {
+    const key = `user_sessions:${userId}`;
+    const sessionId = `session:${Date.now()}`;
+
+    await this.redis.hset(key, sessionId, JSON.stringify(tokenData));
+    await this.redis.expire(key, 30 * 24 * 60 * 60);
+    return sessionId;
+  }
+
+  async generateTokenPair(
     payload: TokenPayload,
-    userAgent: string,
     ipAddress: string,
+    userAgent: string,
   ): Promise<TokenPair & { sessionId: string }> {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -56,7 +68,6 @@ export class TokenService {
         expiresIn: this.configService.get<string>('JWT_EXPIRATION_RT'),
       }),
     ]);
-
     const expirationTime = this.parseExpirationTime(
       this.configService.get<string>('JWT_EXPIRATION_RT') || '7d',
     );
@@ -76,23 +87,15 @@ export class TokenService {
       },
       created_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + expirationTime).toISOString(),
-      revoked: false,
     };
 
     const sessionId = await this.saveTokenToRedis(payload.userId, sessionData);
+
+    console.log('=== SESSION DATA ===');
+    console.log(sessionData);
+    console.log('===================');
+
     return { accessToken, refreshToken, sessionId };
-  }
-
-  async saveTokenToRedis(
-    userId: string,
-    tokenData: TokenRedis,
-  ): Promise<string> {
-    const key = `user_sessions:${userId}`;
-    const sessionId = `session:${Date.now()}`;
-
-    await this.redis.hset(key, sessionId, JSON.stringify(tokenData));
-    await this.redis.expire(key, 30 * 24 * 60 * 60);
-    return sessionId;
   }
 
   async getUserSessions(userId: string): Promise<SessionData[]> {
@@ -114,28 +117,6 @@ export class TokenService {
 
   async revokeSession(userId: string, sessionId: string): Promise<void> {
     const key = `user_sessions:${userId}`;
-    const sessionData = await this.redis.hget(key, sessionId);
-
-    if (sessionData) {
-      const parsedData = JSON.parse(sessionData) as TokenRedis;
-      parsedData.revoked = true;
-      await this.redis.hset(key, sessionId, JSON.stringify(parsedData));
-    }
-  }
-
-  async revokeAllSessions(userId: string): Promise<void> {
-    const key = `user_sessions:${userId}`;
-    const sessions = await this.redis.hgetall(key);
-
-    for (const [sessionId, sessionData] of Object.entries(sessions)) {
-      const parsedData = JSON.parse(sessionData) as TokenRedis;
-      parsedData.revoked = true;
-      await this.redis.hset(key, sessionId, JSON.stringify(parsedData));
-    }
-  }
-
-  async removeTokenFromRedis(userId: string, sessionId: string): Promise<void> {
-    const key = `user_sessions:${userId}`;
     await this.redis.hdel(key, sessionId);
   }
 
@@ -150,7 +131,6 @@ export class TokenService {
 
   async verifyToken(
     token: string,
-    sessionId: string,
     isRefreshToken = false,
   ): Promise<TokenPayload> {
     const secret = isRefreshToken
@@ -161,10 +141,6 @@ export class TokenService {
       const payload = await this.jwtService.verifyAsync<TokenPayload>(token, {
         secret,
       });
-      const session = await this.getUserSession(payload.userId, sessionId);
-      if (session.revoked) {
-        throw new UnauthorizedException('Session has been revoked');
-      }
       return payload;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -192,37 +168,5 @@ export class TokenService {
   async deleteResetToken(token: string): Promise<void> {
     const key = `reset_token:${token}`;
     await this.redis.del(key);
-  }
-
-  async incrementFailedLoginAttempts(email: string): Promise<number> {
-    const key = `failed_login:${email}`;
-    const attempts = await this.redis.incr(key);
-
-    if (attempts === 1) {
-      await this.redis.expire(key, 15 * 60);
-    }
-
-    return attempts;
-  }
-
-  async getFailedLoginAttempts(email: string): Promise<number> {
-    const key = `failed_login:${email}`;
-    const attempts = await this.redis.get(key);
-    return attempts ? parseInt(attempts, 10) : 0;
-  }
-
-  async resetFailedLoginAttempts(email: string): Promise<void> {
-    const key = `failed_login:${email}`;
-    await this.redis.del(key);
-  }
-
-  async isLoginBlocked(email: string): Promise<boolean> {
-    const attempts = await this.getFailedLoginAttempts(email);
-    return attempts >= 5;
-  }
-
-  async getLoginBlockTimeRemaining(email: string): Promise<number> {
-    const key = `failed_login:${email}`;
-    return await this.redis.ttl(key);
   }
 }

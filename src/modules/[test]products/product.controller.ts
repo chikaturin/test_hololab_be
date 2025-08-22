@@ -17,6 +17,8 @@ import {
   ApiParam,
   ApiResponse,
   ApiBody,
+  ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
 import {
   CreateProductDto,
@@ -44,6 +46,9 @@ export class ProductController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new product' })
+  @ApiBearerAuth('accessToken')
+  @ApiHeader({ name: 'refreshToken', description: 'Refresh token' })
+  @ApiHeader({ name: 'sessionId', description: 'Session ID' })
   @ApiBody({ type: CreateProductDto })
   @ApiResponse({
     status: 201,
