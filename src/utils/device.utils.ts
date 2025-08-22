@@ -1,4 +1,4 @@
-import { DeviceInfoDto } from '../auth/dto/device-info.dto';
+import { DeviceInfoDto } from 'src/modules/auth/dto/device-info.dto';
 import { UAParser } from 'ua-parser-js';
 
 export function parseDeviceInfo(

@@ -23,6 +23,7 @@ export interface TokenRedis {
   device_info: DeviceInfo;
   created_at: string;
   expires_at: string;
+  revoked: boolean;
 }
 
 export interface SessionData extends TokenRedis {

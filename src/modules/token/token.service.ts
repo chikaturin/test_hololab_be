@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { parseDeviceInfo } from '../util/device.utils';
+import { parseDeviceInfo } from 'src/utils/device.utils';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { JwtService } from '@nestjs/jwt';
@@ -87,6 +87,7 @@ export class TokenService {
       },
       created_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + expirationTime).toISOString(),
+      revoked: false,
     };
 
     const sessionId = await this.saveTokenToRedis(payload.userId, sessionData);
@@ -131,6 +132,7 @@ export class TokenService {
 
   async verifyToken(
     token: string,
+    sessionId: string,
     isRefreshToken = false,
   ): Promise<TokenPayload> {
     const secret = isRefreshToken
@@ -141,6 +143,10 @@ export class TokenService {
       const payload = await this.jwtService.verifyAsync<TokenPayload>(token, {
         secret,
       });
+      const session = await this.getUserSession(payload.userId, sessionId);
+      if (session.revoked) {
+        throw new UnauthorizedException('Session has been revoked');
+      }
       return payload;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -168,5 +174,10 @@ export class TokenService {
   async deleteResetToken(token: string): Promise<void> {
     const key = `reset_token:${token}`;
     await this.redis.del(key);
+  }
+
+  async removeTokenFromRedis(userId: string, sessionId: string): Promise<void> {
+    const key = `user_sessions:${userId}`;
+    await this.redis.hdel(key, sessionId);
   }
 }
