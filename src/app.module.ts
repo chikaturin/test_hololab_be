@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProductModule } from './modules/[test]products/product.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.model';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
-    ProductModule,
     DatabaseModule,
     AuthModule,
+    UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],

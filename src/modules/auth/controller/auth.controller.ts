@@ -6,18 +6,26 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiOperation,
   ApiTags,
   ApiBearerAuth,
   ApiHeader,
+  ApiSecurity,
 } from '@nestjs/swagger';
 import { AuthService } from '../auth.service';
-import { Auth } from '../entities/auth.entity';
 import type { Request } from 'express';
-import { setCookie } from '../../util/cookie.utils';
-import { LoginDto, RefreshTokenDto, RegisterDto } from '../dto/index.dto';
+import { User } from 'src/modules/users/entities/user.entity';
+import { setCookie } from 'src/utils/cookie.utils';
+import {
+  LoginDto,
+  RefreshTokenDto,
+  RegisterDto,
+  LogoutDto,
+} from '../dto/index.dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,7 +35,7 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Register a new user' })
-  async register(@Body() registerDto: RegisterDto): Promise<Auth> {
+  async register(@Body() registerDto: RegisterDto): Promise<User> {
     return this.authService.register(registerDto);
   }
 
@@ -75,5 +83,16 @@ export class AuthController {
     });
 
     return data;
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout from a session - *auth.logout' })
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
+  async logout(@Req() request: any, @Body() body: LogoutDto) {
+    await this.authService.logout(request.user.id, body.sessionId);
+    return { message: 'Logged out successfully' };
   }
 }
