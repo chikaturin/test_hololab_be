@@ -7,7 +7,9 @@ import {
   HttpStatus,
   Res,
   UseGuards,
+  Get,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import {
   ApiOperation,
   ApiTags,
@@ -24,16 +26,45 @@ import {
   RefreshTokenDto,
   RegisterDto,
   LogoutDto,
+  AuthResponseDto,
 } from '../dto/index.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permission.guard';
+import {
+  ResponseMessage,
+  Permissions,
+} from 'src/common/decorators/index.decorators';
+import type { IUserRequest } from 'src/interfaces';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Success')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions()
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
+  auth(@Req() request: IUserRequest) {
+    const user = request.user as any;
+    return plainToInstance(
+      AuthResponseDto,
+      {
+        ...user,
+        userRoles: user.userRoles?.map((ur) => ({
+          role: { name: ur.role?.name },
+        })),
+      },
+      { excludeExtraneousValues: true },
+    );
+  }
+
   @Post('register')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Register a new user')
   @ApiOperation({ summary: 'Register a new user' })
   async register(@Body() registerDto: RegisterDto): Promise<User> {
     return this.authService.register(registerDto);
@@ -41,6 +72,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Login a user')
   @ApiOperation({ summary: 'Login a user' })
   async login(
     @Body() loginDto: LoginDto,
@@ -53,6 +85,7 @@ export class AuthController {
 
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Refresh access token using refresh token')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiBearerAuth('accessToken')
   @ApiHeader({ name: 'refreshToken', description: 'Refresh token' })
@@ -87,6 +120,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Logout from a session')
   @ApiOperation({ summary: 'Logout from a session - *auth.logout' })
   @UseGuards(AuthGuard)
   @ApiBearerAuth()

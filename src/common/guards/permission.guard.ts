@@ -30,33 +30,40 @@ export class PermissionsGuard implements CanActivate {
 
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user?: User }>();
-    const authData = this.extractTokenAndSessionIdFromHeader(request);
-    if (!authData) {
-      throw new UnauthorizedException('No token or session id provided');
+      .getRequest<Request & { user?: any }>();
+
+    const user = request.user;
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
     }
-    const { token, sessionId } = authData;
+
     try {
-      const payload = await this.tokenService.verifyToken(token, sessionId);
-      const user = await this.roleService.findUserWithRoles(payload.userId);
-      if (!user || user.isActive === false) {
-        throw new UnauthorizedException('User not found');
+      if (user.isActive === false) {
+        throw new UnauthorizedException('User not active');
       }
+
       const rolePermissions = await Promise.all(
-        user.userRoles.map((r) =>
+        user.userRoles.map((r: any) =>
           this.roleService.getRolePermissions(r.roleId),
         ),
       );
       const allPermissions = rolePermissions.flat();
-      request.user = user;
+
       const hasPermission = requiredPermissions.every((permission) =>
         allPermissions.includes(permission),
       );
-      if (!hasPermission) throw new ForbiddenException('Permission denied');
+
+      if (!hasPermission) {
+        throw new ForbiddenException('Permission denied');
+      }
+
       return true;
     } catch (error) {
-      console.log(error);
-      throw new UnauthorizedException('Invalid token');
+      console.log('PermissionsGuard error:', error);
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Permission check failed');
     }
   }
   private extractTokenAndSessionIdFromHeader(

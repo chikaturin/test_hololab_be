@@ -17,11 +17,13 @@ export class User extends Document {
   @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
-  roleId: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'Staff', required: true })
-  staffId: Types.ObjectId;
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Staff',
+    required: false,
+    default: '68a99a1da8822c042f35b2c6',
+  })
+  staffId?: Types.ObjectId;
 
   @Prop({ type: Boolean, default: true })
   isActive: boolean;

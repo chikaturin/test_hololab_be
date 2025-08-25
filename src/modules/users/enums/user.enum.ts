@@ -4,3 +4,9 @@ export enum UserStatus {
   SUSPENDED = 'suspended',
   PENDING = 'pending',
 }
+
+export enum UserRole {
+  ADMIN = 'admin',
+  STAFF = 'staff',
+  MANAGER = 'manager',
+}

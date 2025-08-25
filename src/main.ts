@@ -1,46 +1,54 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
+import { PermissionsGuard } from './common/guards/permission.guard';
+import { AuthGuard } from './common/guards/auth.guard';
+import helmet from 'helmet';
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  app.use(cookieParser());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
-  // Swagger configuration
+  app.enableCors({
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'x-session-id',
+    ],
+    exposedHeaders: ['x-session-id'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
   const config = new DocumentBuilder()
     .setTitle('Test Hololab API')
     .setDescription('API documentation for Test Hololab project')
     .setVersion('1.0')
     .addTag('products')
     .addTag('categories')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'accessToken',
-        description: 'Enter your access token',
-        in: 'header',
-      },
-      'accessToken',
-    )
+    .addBearerAuth()
     .addApiKey(
       {
         type: 'apiKey',
-        name: 'refreshToken',
-        description: 'Enter your refresh token',
-        in: 'header',
-      },
-      'refreshToken',
-    )
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: 'sessionId',
+        name: 'x-session-id',
         description: 'Enter your session ID',
         in: 'header',
       },
-      'sessionId',
+      'x-session-id',
     )
     .build();
 

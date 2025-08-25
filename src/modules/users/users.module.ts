@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from './entities/user.entity';
 import { TokenModule } from '../token/token.module';
-import { RoleModule } from 'src/modules/roles/role.module';
+import { RoleModule } from '../roles/role.module';
 
 @Module({
   imports: [

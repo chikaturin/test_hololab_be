@@ -17,7 +17,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Check if user already exists
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
     });
@@ -25,10 +24,8 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(createUserDto.password);
 
-    // Create new user
     const newUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
@@ -104,14 +101,13 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
-    // Lấy user roles từ UserRole collection
+
     const UserRole = this.userModel.db.collection('userroles');
     const userRoles = await UserRole.find({ userId }).toArray();
-    
+
     return {
       ...user.toObject(),
-      userRoles
+      userRoles,
     };
   }
 }

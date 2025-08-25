@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UserRole, UserRoleDocument } from './entities/user-role.entity';
 import { Role, RoleDocument } from './entities/roles.entity';
 import {
@@ -89,15 +89,25 @@ export class RoleService {
   async findUserWithRoles(userId: string): Promise<any> {
     const User = this.roleModel.db.collection('users');
     const user = await User.findOne({
-      _id: new (this.roleModel.db.constructor as any).ObjectId(userId),
+      _id: new Types.ObjectId(userId),
     });
     if (!user) return null;
 
-    const userRoles = await this.userRoleModel.find({ userId });
+    const userRoles = await this.userRoleModel.find({ userId }).lean();
+
+    const populatedUserRoles = await Promise.all(
+      userRoles.map(async (userRole) => {
+        const role = await this.roleModel.findById(userRole.roleId).lean();
+        return {
+          ...userRole,
+          role: role || {},
+        };
+      }),
+    );
 
     return {
       ...user,
-      userRoles,
+      userRoles: populatedUserRoles,
     };
   }
 
