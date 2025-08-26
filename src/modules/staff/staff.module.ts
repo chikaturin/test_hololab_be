@@ -3,12 +3,24 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Staff, StaffSchema } from './entities/staff.entities';
 import { StaffService } from './staff.service';
 import { StaffController } from './staff.controller';
+import { UsersModule } from '../users';
+import { User, UserSchema } from '../users/entities/user.entity';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permission.guard';
+import { RoleModule } from 'src/modules/roles/role.module';
+import { TokenModule } from 'src/modules/token/token.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Staff.name, schema: StaffSchema }]),
+    UsersModule,
+    MongooseModule.forFeature([
+      { name: Staff.name, schema: StaffSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
+    RoleModule,
+    TokenModule,
   ],
   controllers: [StaffController],
-  providers: [StaffService],
+  providers: [StaffService, AuthGuard, PermissionsGuard],
 })
 export class StaffModule {}

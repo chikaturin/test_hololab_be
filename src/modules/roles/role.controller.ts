@@ -25,7 +25,7 @@ import { PermissionsGuard } from 'src/common/guards/permission.guard';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permissions.enum';
 @ApiTags('Roles')
-@Controller('admin/roles')
+@Controller('/roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

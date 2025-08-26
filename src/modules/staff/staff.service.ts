@@ -3,14 +3,30 @@ import { CreateStaffDto, UpdateStaffDto } from './dto/index.dto';
 import { Staff } from './entities/staff.entities';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { hashPassword } from 'src/utils/bcrypt';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class StaffService {
-  constructor(@InjectModel(Staff.name) private staffModel: Model<Staff>) {}
+  constructor(
+    @InjectModel(Staff.name) private staffModel: Model<Staff>,
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
-  async createStaff(createStaffDto: CreateStaffDto): Promise<Staff> {
+  async createStaff(
+    createStaffDto: CreateStaffDto,
+  ): Promise<{ staff: Staff; user: User }> {
     const staff = new this.staffModel(createStaffDto);
-    return staff.save();
+    await staff.save();
+
+    const user = new this.userModel({
+      email: createStaffDto.email,
+      password: await hashPassword(createStaffDto.password),
+      staffId: staff._id,
+    });
+    await user.save();
+
+    return { staff, user };
   }
 
   async updateStaff(

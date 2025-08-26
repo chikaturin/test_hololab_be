@@ -19,12 +19,12 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from '../auth.service';
 import type { Request } from 'express';
-import { User } from 'src/modules/users/entities/user.entity';
+// import { User } from 'src/modules/users/entities/user.entity';
 import { setCookie } from 'src/utils/cookie.utils';
 import {
   LoginDto,
   RefreshTokenDto,
-  RegisterDto,
+  // RegisterDto,
   LogoutDto,
   AuthResponseDto,
 } from '../dto/index.dto';
@@ -62,13 +62,13 @@ export class AuthController {
     );
   }
 
-  @Post('register')
-  @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Register a new user')
-  @ApiOperation({ summary: 'Register a new user' })
-  async register(@Body() registerDto: RegisterDto): Promise<User> {
-    return this.authService.register(registerDto);
-  }
+  // @Post('register')
+  // @HttpCode(HttpStatus.OK)
+  // @ResponseMessage('Register a new user')
+  // @ApiOperation({ summary: 'Register a new user' })
+  // async register(@Body() registerDto: RegisterDto): Promise<User> {
+  //   return this.authService.register(registerDto);
+  // }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)

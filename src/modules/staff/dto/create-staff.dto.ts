@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDate } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsDate,
+  IsEmail,
+  MinLength,
+} from 'class-validator';
 
 export class CreateStaffDto {
   @ApiProperty({
@@ -73,4 +79,23 @@ export class CreateStaffDto {
   @IsNotEmpty()
   @IsDate()
   hireDate: Date;
+
+  @ApiProperty({
+    description: 'Email address for user account',
+    example: 'john.doe@company.com',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({
+    description: 'Password for user account',
+    example: 'password123',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  password: string;
 }

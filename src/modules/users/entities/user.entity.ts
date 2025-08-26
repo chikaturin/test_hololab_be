@@ -21,7 +21,6 @@ export class User extends Document {
     type: Types.ObjectId,
     ref: 'Staff',
     required: false,
-    default: '68a99a1da8822c042f35b2c6',
   })
   staffId?: Types.ObjectId;
 
