@@ -7,11 +7,13 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { PermissionsGuard } from 'src/common/guards/permission.guard';
 import { RoleModule } from 'src/modules/roles/role.module';
 import { TokenModule } from 'src/modules/token/token.module';
+import { Staff, StaffSchema } from 'src/modules/staff/entities/staff.entities';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Department.name, schema: DepartmentSchema },
+      { name: Staff.name, schema: StaffSchema },
     ]),
     RoleModule,
     TokenModule,

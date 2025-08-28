@@ -17,6 +17,9 @@ export class Staff extends Document {
   @Prop({ type: String, required: true })
   phone: string;
 
+  @Prop({ type: Number, required: true, default: 0 })
+  salary: number;
+
   @Prop({ type: String, required: true })
   address: string;
 
@@ -29,8 +32,8 @@ export class Staff extends Document {
   @Prop({ type: Date, required: true })
   hireDate: Date;
 
-  @Prop({ type: String, required: true })
-  status: string;
+  @Prop({ type: Boolean, required: true, default: true })
+  status: boolean;
 }
 
 export const StaffSchema = SchemaFactory.createForClass(Staff);

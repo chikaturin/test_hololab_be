@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsString,
-  IsDate,
   IsEmail,
   MinLength,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateStaffDto {
@@ -32,8 +32,16 @@ export class CreateStaffDto {
     required: true,
   })
   @IsNotEmpty()
-  @IsDate()
   dob: Date;
+
+  @ApiProperty({
+    description: 'Salary',
+    example: 1000,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  salary: number;
 
   @ApiProperty({
     description: 'Phone number',
@@ -77,7 +85,6 @@ export class CreateStaffDto {
     required: true,
   })
   @IsNotEmpty()
-  @IsDate()
   hireDate: Date;
 
   @ApiProperty({

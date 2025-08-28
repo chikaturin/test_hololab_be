@@ -42,6 +42,13 @@ export class PermissionsGuard implements CanActivate {
         throw new UnauthorizedException('User not active');
       }
 
+      const isSuperAdmin = (user.userRoles || []).some(
+        (r: any) => r.role?.name === 'Super Admin',
+      );
+      if (isSuperAdmin) {
+        return true;
+      }
+
       const rolePermissions = await Promise.all(
         user.userRoles.map((r: any) =>
           this.roleService.getRolePermissions(r.roleId),

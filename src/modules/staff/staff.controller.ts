@@ -12,7 +12,13 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBearerAuth,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { StaffService } from './staff.service';
 import { Staff } from './entities/staff.entities';
 import { CreateStaffDto, UpdateStaffDto } from './dto/index.dto';
@@ -20,9 +26,10 @@ import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permission
 import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { PermissionsGuard } from 'src/common/guards/permission.guard';
-import { User } from '../users/entities/user.entity';
 
 @ApiTags('Staff')
+@ApiBearerAuth()
+@ApiSecurity('x-session-id')
 @Controller('staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
@@ -48,6 +55,8 @@ export class StaffController {
   @Post()
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(PermissionEnum.USER_MANAGEMENT)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new staff' })
   @ApiResponse({
@@ -64,7 +73,7 @@ export class StaffController {
   async createStaff(
     @Body(new ValidationPipe({ transform: true }))
     createStaffDto: CreateStaffDto,
-  ): Promise<{ staff: Staff; user: User }> {
+  ): Promise<string> {
     try {
       return this.staffService.createStaff(createStaffDto);
     } catch (error) {
@@ -75,6 +84,8 @@ export class StaffController {
   @Patch(':id')
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(PermissionEnum.USER_MANAGEMENT)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update a staff' })
   @ApiResponse({
@@ -97,6 +108,8 @@ export class StaffController {
   @Delete(':id')
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(PermissionEnum.USER_MANAGEMENT)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a staff' })
   @ApiResponse({
@@ -115,6 +128,8 @@ export class StaffController {
   @Get(':id')
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(PermissionEnum.USER_MANAGEMENT)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get a staff by id' })
   @ApiResponse({

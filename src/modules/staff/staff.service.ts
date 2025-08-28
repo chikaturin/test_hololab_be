@@ -13,20 +13,25 @@ export class StaffService {
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  async createStaff(
-    createStaffDto: CreateStaffDto,
-  ): Promise<{ staff: Staff; user: User }> {
+  async createStaff(createStaffDto: CreateStaffDto): Promise<string> {
     const staff = new this.staffModel(createStaffDto);
-    await staff.save();
+
+    const userMail = await this.userModel.findOne({
+      email: createStaffDto.email,
+    });
+    if (userMail) {
+      throw new Error('Mail already exists');
+    }
 
     const user = new this.userModel({
       email: createStaffDto.email,
       password: await hashPassword(createStaffDto.password),
       staffId: staff._id,
     });
+    await staff.save();
     await user.save();
 
-    return { staff, user };
+    return 'Staff create Successfully';
   }
 
   async updateStaff(
@@ -52,7 +57,9 @@ export class StaffService {
   }
 
   async getStaffById(id: string): Promise<Staff> {
-    const staff = await this.staffModel.findById(id);
+    const staff = await this.staffModel
+      .findById(id)
+      .populate('departmentId', 'name description');
     if (!staff) {
       throw new Error('Staff not found');
     }
@@ -60,6 +67,6 @@ export class StaffService {
   }
 
   async getAllStaff(): Promise<Staff[]> {
-    return this.staffModel.find();
+    return this.staffModel.find().populate('departmentId', 'name');
   }
 }
