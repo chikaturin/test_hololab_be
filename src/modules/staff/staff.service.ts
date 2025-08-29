@@ -50,10 +50,14 @@ export class StaffService {
   }
 
   async deleteStaff(id: string): Promise<void> {
-    const deletedStaff = await this.staffModel.findByIdAndDelete(id);
-    if (!deletedStaff) {
+    const staff = await this.staffModel.findById(id);
+    if (!staff) {
       throw new Error('Staff not found');
     }
+
+    await this.userModel.deleteMany({ staffId: staff._id });
+
+    await this.staffModel.findByIdAndDelete(id);
   }
 
   async getStaffById(id: string): Promise<Staff> {

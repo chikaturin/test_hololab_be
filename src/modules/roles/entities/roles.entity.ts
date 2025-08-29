@@ -16,6 +16,9 @@ export class Role extends Document {
   })
   roleType: RoleType;
 
+  @Prop({ type: String, enum: ['low', 'medium', 'high'], default: 'low' })
+  level: string;
+
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
