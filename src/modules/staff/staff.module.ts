@@ -6,10 +6,10 @@ import { StaffController } from './staff.controller';
 import { UsersModule } from '../users';
 import { User, UserSchema } from '../users/entities/user.entity';
 import { UserRole, UserRoleSchema } from '../roles/entities/user-role.entity';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
-import { RoleModule } from 'src/modules/roles/role.module';
-import { TokenModule } from 'src/modules/token/token.module';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
+import { RoleModule } from '../../modules/roles/role.module';
+import { TokenModule } from '../../modules/token/token.module';
 
 @Module({
   imports: [

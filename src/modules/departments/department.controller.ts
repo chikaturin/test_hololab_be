@@ -18,10 +18,10 @@ import {
   ApiBearerAuth,
   ApiSecurity,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permissions.enum';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { Permissions as PermissionEnum } from '../../modules/auth/enums/permissions.enum';
 
 @ApiTags('Departments')
 @Controller('departments')

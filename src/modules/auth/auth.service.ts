@@ -9,12 +9,12 @@ import { Model } from 'mongoose';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Permissions, PermissionDocument } from './entities/index.entities';
-import { hashPassword, comparePassword } from 'src/utils/bcrypt';
+import { hashPassword, comparePassword } from '../../utils/bcrypt';
 import { TokenService } from '../token/token.service';
 import { AddPermissionsDto } from './dto/add-permissions.dto';
-import { Role, RoleDocument } from 'src/modules/roles/entities/roles.entity';
+import { Role, RoleDocument } from '../../modules/roles/entities/roles.entity';
 import { DeletePermissionsDto } from './dto/delete-permissions.dto';
-import { RoleService } from 'src/modules/roles/role.service';
+import { RoleService } from '../../modules/roles/role.service';
 import {
   RolePermission,
   RolePermissionDocument,

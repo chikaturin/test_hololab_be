@@ -22,10 +22,10 @@ import {
 import { StaffService } from './staff.service';
 import { Staff } from './entities/staff.entities';
 import { CreateStaffDto, UpdateStaffDto } from './dto/index.dto';
-import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permissions.enum';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
+import { Permissions as PermissionEnum } from '../../modules/auth/enums/permissions.enum';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
 
 @ApiTags('Staff')
 @ApiBearerAuth()

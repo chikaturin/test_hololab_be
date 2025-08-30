@@ -1,10 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { parseDeviceInfo } from 'src/utils/device.utils';
+import { parseDeviceInfo } from '../../utils/device.utils';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { getRedisCloudConfig } from 'src/config/redis.config';
+import { getRedisCloudConfig } from '../../config/redis.config';
 import { createClient } from 'redis';
 import {
   TokenPair,

@@ -16,11 +16,11 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
-import { ResponseMessage } from 'src/common/decorators/index.decorators';
+import { ResponseMessage } from '../../common/decorators/index.decorators';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permissions.enum';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { Permissions as PermissionEnum } from '../../modules/auth/enums/permissions.enum';
 
 @ApiTags('Users')
 @Controller('users')

@@ -7,10 +7,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/index.decorators';
-import { User } from 'src/modules/users/entities/user.entity';
-import { TokenService } from 'src/modules/token/token.service';
-import { RoleService } from 'src/modules/roles/role.service';
-import { getCookie } from 'src/utils/cookie.utils';
+import { User } from '../../modules/users/entities/user.entity';
+import { TokenService } from '../../modules/token/token.service';
+import { RoleService } from '../../modules/roles/role.service';
+import { getCookie } from '../../utils/cookie.utils';
 import { Request } from 'express';
 
 @Injectable()

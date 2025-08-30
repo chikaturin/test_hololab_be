@@ -7,9 +7,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Department, DepartmentDocument } from './entities/department.entity';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/index.dto';
-import { Staff } from 'src/modules/staff/entities/staff.entities';
-import { User } from 'src/modules/users/entities/user.entity';
-import { UserRole } from 'src/modules/roles/entities/user-role.entity';
+import { Staff } from '../../modules/staff/entities/staff.entities';
+import { User } from '../../modules/users/entities/user.entity';
+import { UserRole } from '../../modules/roles/entities/user-role.entity';
 import { RoleService } from '../roles/role.service';
 
 @Injectable()

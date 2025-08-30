@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { AddPermissionsDto } from '../dto/index.dto';
-import { ResponseMessage } from 'src/common/decorators/index.decorators';
+import { ResponseMessage } from '../../../common/decorators/index.decorators';
 import {
   ApiTags,
   ApiOperation,

@@ -18,12 +18,12 @@ import {
   ApiSecurity,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { ResponseMessage } from 'src/common/decorators/response.decorator';
+import { ResponseMessage } from '../../common/decorators/response.decorator';
 import { RoleService } from './role.service';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
-import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { Permissions as PermissionEnum } from 'src/modules/auth/enums/permissions.enum';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { Permissions as PermissionEnum } from '../../modules/auth/enums/permissions.enum';
 @ApiTags('Roles')
 @Controller('/roles')
 export class RoleController {

@@ -3,9 +3,9 @@ import { AuthController } from './controller/index';
 import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Permissions, PermissionSchema } from './entities/permission.entity';
-import { User, UserSchema } from 'src/modules/users/entities/user.entity';
+import { User, UserSchema } from '../../modules/users/entities/user.entity';
 import { TokenModule } from '../token/token.module';
-import { RoleModule } from 'src/modules/roles/role.module';
+import { RoleModule } from '../../modules/roles/role.module';
 
 @Module({
   imports: [

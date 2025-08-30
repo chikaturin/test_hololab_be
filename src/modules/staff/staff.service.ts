@@ -3,7 +3,7 @@ import { CreateStaffDto, UpdateStaffDto } from './dto/index.dto';
 import { Staff } from './entities/staff.entities';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
-import { hashPassword } from 'src/utils/bcrypt';
+import { hashPassword } from '../../utils/bcrypt';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../roles/entities/user-role.entity';
 import { RoleService } from '../roles/role.service';

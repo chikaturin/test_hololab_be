@@ -20,7 +20,7 @@ import {
 import { AuthService } from '../auth.service';
 import type { Request } from 'express';
 // import { User } from 'src/modules/users/entities/user.entity';
-import { setCookie } from 'src/utils/cookie.utils';
+import { setCookie } from '../../../utils/cookie.utils';
 import {
   LoginDto,
   RefreshTokenDto,
@@ -28,13 +28,13 @@ import {
   LogoutDto,
   AuthResponseDto,
 } from '../dto/index.dto';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
+import { AuthGuard } from '../../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../../common/guards/permission.guard';
 import {
   ResponseMessage,
   Permissions,
-} from 'src/common/decorators/index.decorators';
-import type { IUserRequest } from 'src/interfaces';
+} from '../../../common/decorators/index.decorators';
+import type { IUserRequest } from '../../../interfaces';
 
 @ApiTags('Auth')
 @Controller('auth')
