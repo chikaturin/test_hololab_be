@@ -1,99 +1,276 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Test Hololab API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust NestJS-based REST API with authentication, role-based access control, and Redis Cloud integration.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **Authentication & Authorization**: JWT-based authentication with role-based permissions
+- **User Management**: Complete user CRUD operations with role assignment
+- **Role-Based Access Control**: Flexible permission system with role hierarchies
+- **Session Management**: Redis-based session storage with device tracking
+- **API Documentation**: Swagger/OpenAPI documentation
+- **Security**: Helmet security headers, CORS configuration
+- **Database**: MongoDB with Mongoose ODM
+- **Cache**: Redis Cloud integration for session and token storage
+- **Validation**: Class-validator and class-transformer for DTO validation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🏗️ Architecture
 
-## Project setup
+### Design Choices
 
-```bash
-$ npm install
+This project follows a **modular architecture** with clear separation of concerns:
+
+1. **Module-based Structure**: Each domain (auth, users, roles, departments, staff) is organized into its own module
+2. **Guard-based Security**: Authentication and permission checks are handled by guards at the controller level
+3. **Service Layer Pattern**: Business logic is encapsulated in services, controllers only handle HTTP requests
+4. **DTO Validation**: Input validation using class-validator decorators
+5. **Entity-based Models**: Mongoose schemas with proper TypeScript typing
+6. **Redis for Sessions**: Distributed session management using Redis Cloud
+
+### Project Structure
+
+```
+src/
+├── common/           # Shared utilities, guards, decorators
+├── config/           # Configuration files (MongoDB, Redis)
+├── database/         # Database connection modules
+├── global/           # Global enums and classes
+├── interfaces/       # TypeScript interfaces
+├── modules/          # Feature modules
+│   ├── auth/         # Authentication & authorization
+│   ├── users/        # User management
+│   ├── roles/        # Role & permission management
+│   ├── departments/  # Department management
+│   └── staff/        # Staff management
+├── utils/            # Utility functions
+└── main.ts           # Application entry point
 ```
 
-## Compile and run the project
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB instance
+- Redis Cloud account
+
+## 🛠️ Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd test_hololab
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**
+
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Port
+   PORT=9999
+
+   # MongoDB
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+   MONGODB_NAME=your_database_name
+
+   # Redis Cloud
+   REDIS_HOST=your-redis-host.redis-cloud.com
+   REDIS_PORT=your-redis-port
+   REDIS_USERNAME=default
+   REDIS_PASSWORD=your-redis-password
+   REDIS_DB=0
+
+   # JWT Configuration
+   JWT_SECRET_AT=your_access_token_secret
+   JWT_EXPIRATION_AT=1d
+   JWT_SECRET_RT=your_refresh_token_secret
+   JWT_EXPIRATION_RT=15d
+   ```
+
+4. **Database Setup**
+
+   Ensure your MongoDB instance is running and accessible. The application will automatically create collections and indexes.
+
+5. **Redis Cloud Setup**
+   - Sign up for Redis Cloud at [redis.com](https://redis.com)
+   - Create a new database
+   - Copy connection details to your `.env` file
+
+## 🚀 Running the Application
+
+### Development Mode
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Run tests
+### Production Mode
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run build
+npm run start:prod
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Testing
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📚 API Documentation
 
-## Resources
+Once the application is running, you can access:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **API Base URL**: `http://localhost:9999/api`
+- **Swagger Documentation**: `http://localhost:9999/api`
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🔐 Authentication Flow
 
-## Support
+1. **Registration**: `POST /api/auth/register`
+2. **Login**: `POST /api/auth/login`
+3. **Token Refresh**: `POST /api/auth/refresh-token`
+4. **Logout**: `POST /api/auth/logout`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Protected Routes
 
-## Stay in touch
+Most routes require authentication. Include the following headers:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- `Authorization: Bearer <access_token>`
+- `x-session-id: <session_id>`
 
-## License
+## 🏢 Core Modules
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-# test_hololab_be
+### Auth Module
+
+- User authentication and session management
+- JWT token generation and validation
+- Permission-based access control
+
+### Users Module
+
+- User CRUD operations
+- Profile management
+- Role assignment
+
+### Roles Module
+
+- Role creation and management
+- Permission assignment
+- User-role relationships
+
+### Departments Module
+
+- Department hierarchy management
+- Staff assignment to departments
+
+### Staff Module
+
+- Staff member management
+- Department assignment
+- Role-based permissions
+
+## 🔧 Configuration
+
+### MongoDB Configuration
+
+Located in `src/config/mongodb.config.ts`, handles database connection with connection pooling and retry logic.
+
+### Redis Configuration
+
+Located in `src/config/redis.config.ts`, manages Redis Cloud connection for session storage and caching.
+
+### Security Configuration
+
+- Helmet for security headers
+- CORS configuration for cross-origin requests
+- Rate limiting (configurable)
+
+## 🧪 Testing
+
+The project includes comprehensive testing setup:
+
+- **Unit Tests**: Jest-based unit tests for services and controllers
+- **E2E Tests**: End-to-end testing for API endpoints
+- **Test Coverage**: Coverage reports for code quality
+
+## 📦 Dependencies
+
+### Core Dependencies
+
+- `@nestjs/*`: NestJS framework packages
+- `mongoose`: MongoDB ODM
+- `@nestjs-modules/ioredis`: Redis integration
+- `bcrypt`: Password hashing
+- `jsonwebtoken`: JWT handling
+
+### Development Dependencies
+
+- `@nestjs/cli`: NestJS CLI tools
+- `eslint`: Code linting
+- `prettier`: Code formatting
+- `jest`: Testing framework
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **Redis Connection Failed**
+   - Verify Redis Cloud credentials in `.env`
+   - Check network connectivity
+   - Ensure Redis Cloud database is active
+
+2. **MongoDB Connection Failed**
+   - Verify MongoDB URI in `.env`
+   - Check network connectivity
+   - Ensure MongoDB instance is running
+
+3. **JWT Token Issues**
+   - Verify JWT secrets in `.env`
+   - Check token expiration settings
+
+### Logs
+
+The application provides detailed logging for debugging:
+
+- Redis connection status
+- Database connection status
+- Authentication attempts
+- Permission checks
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the UNLICENSED license.
+
+## 🆘 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Check the API documentation
+- Review the troubleshooting section
+
+---
+
+**Built with ❤️ using NestJS**
