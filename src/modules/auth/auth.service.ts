@@ -155,8 +155,12 @@ export class AuthService {
     if (!role) {
       throw new NotFoundException('Role not found');
     }
-    const permissionKeys = role.rolePermissions.map((rp) => rp.permission.name);
-    return permissionKeys;
+
+    if (role.keyPermissions && Array.isArray(role.keyPermissions)) {
+      return role.keyPermissions;
+    }
+
+    return [];
   }
 
   async removePermissionFromRole(

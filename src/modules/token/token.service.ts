@@ -4,6 +4,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { getRedisCloudConfig } from 'src/config/redis.config';
+import { createClient } from 'redis';
 import {
   TokenPair,
   TokenPayload,
@@ -13,11 +15,21 @@ import {
 
 @Injectable()
 export class TokenService {
+  private redisClient;
+
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.redisClient = createClient(getRedisCloudConfig(this.configService));
+
+    this.redisClient.on('error', (err) => {
+      console.log('Redis Client Error', err);
+    });
+
+    this.redisClient.connect().catch(console.error);
+  }
 
   private parseExpirationTime(expiration: string): number {
     const match = expiration.match(/^(\d+)([smhd])$/);
@@ -104,13 +116,15 @@ export class TokenService {
     const sessions = await this.redis.hgetall(key);
 
     return Object.entries(sessions).reduce((acc, [sessionId, sessionData]) => {
-      const parsedData = JSON.parse(sessionData) as TokenRedis;
+      if (sessionData) {
+        const parsedData = JSON.parse(sessionData) as TokenRedis;
 
-      acc.push({
-        ...parsedData,
-        session_id: sessionId,
-        refresh_token: 'Something is hidden! :)',
-      });
+        acc.push({
+          ...parsedData,
+          session_id: sessionId,
+          refresh_token: 'Something is hidden! :)',
+        });
+      }
 
       return acc;
     }, [] as SessionData[]);

@@ -158,6 +158,7 @@ export class RoleService {
 
     return {
       ...role.toObject(),
+      _id: (role._id as any).toString(),
       usersCount,
       permissionsCount: allPermissions.length,
       keyPermissions: allPermissions,
@@ -185,7 +186,7 @@ export class RoleService {
       );
     }
 
-    return role;
+    return role as Role;
   }
 
   async deleteRole(id: string): Promise<void> {
@@ -256,7 +257,13 @@ export class RoleService {
         const role = await this.roleModel.findById(userRole.roleId).lean();
         return {
           ...userRole,
-          role: role || {},
+          role: role
+            ? {
+                ...role,
+                // eslint-disable-next-line @typescript-eslint/no-base-to-string
+                _id: role._id.toString(),
+              }
+            : {},
         };
       }),
     );
@@ -271,7 +278,13 @@ export class RoleService {
     const userRoles = await this.userRoleModel.find({ userId });
     const roleIds = userRoles.map((ur) => ur.roleId);
     if (roleIds.length === 0) return [] as unknown as Role[];
-    return this.roleModel.find({ _id: { $in: roleIds } });
+
+    const roles = await this.roleModel.find({ _id: { $in: roleIds } });
+
+    return roles.map((role: any) => ({
+      ...role.toObject(),
+      _id: role._id.toString(),
+    })) as unknown as Role[];
   }
 
   private async updateRolePermissions(

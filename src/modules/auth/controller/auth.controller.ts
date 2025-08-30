@@ -54,7 +54,10 @@ export class AuthController {
       {
         ...user,
         userRoles: user.userRoles?.map((ur) => ({
-          role: { name: ur.role?.name },
+          role: {
+            name: ur.role?.name,
+            _idRole: ur.role?._id || ur.roleId?.toString(),
+          },
         })),
       },
       { excludeExtraneousValues: true },
