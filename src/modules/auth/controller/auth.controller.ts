@@ -17,14 +17,13 @@ import {
   ApiHeader,
   ApiSecurity,
 } from '@nestjs/swagger';
-import { AuthService } from '../auth.service';
 import type { Request } from 'express';
-// import { User } from 'src/modules/users/entities/user.entity';
+import { AuthService } from '../auth.service';
+import type { Response } from 'express';
 import { setCookie } from '../../../utils/cookie.utils';
 import {
   LoginDto,
   RefreshTokenDto,
-  // RegisterDto,
   LogoutDto,
   AuthResponseDto,
 } from '../dto/index.dto';

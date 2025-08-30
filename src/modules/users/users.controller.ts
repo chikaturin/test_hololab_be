@@ -17,10 +17,10 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { ResponseMessage } from '../../common/decorators/index.decorators';
-import { AuthGuard } from 'src/common/guards/auth.guard';
+import { AuthGuard } from '../../common/guards/auth.guard';
 import { PermissionsGuard } from '../../common/guards/permission.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
-import { Permissions as PermissionEnum } from '../../modules/auth/enums/permissions.enum';
+import { Permissions as PermissionEnum } from '../auth/enums/permissions.enum';
 
 @ApiTags('Users')
 @Controller('users')

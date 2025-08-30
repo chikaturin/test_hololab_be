@@ -11,7 +11,7 @@ import { User } from '../../modules/users/entities/user.entity';
 import { TokenService } from '../../modules/token/token.service';
 import { RoleService } from '../../modules/roles/role.service';
 import { getCookie } from '../../utils/cookie.utils';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

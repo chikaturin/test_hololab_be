@@ -12,14 +12,14 @@ import { Permissions, PermissionDocument } from './entities/index.entities';
 import { hashPassword, comparePassword } from '../../utils/bcrypt';
 import { TokenService } from '../token/token.service';
 import { AddPermissionsDto } from './dto/add-permissions.dto';
-import { Role, RoleDocument } from '../../modules/roles/entities/roles.entity';
+import { Role, RoleDocument } from '../roles/entities/roles.entity';
 import { DeletePermissionsDto } from './dto/delete-permissions.dto';
-import { RoleService } from '../../modules/roles/role.service';
+import { RoleService } from '../roles/role.service';
 import {
   RolePermission,
   RolePermissionDocument,
-} from 'src/modules/auth/entities/role-permissions.entity';
-import { User, UserDocument } from 'src/modules/users/entities/user.entity';
+} from './entities/role-permissions.entity';
+import { User, UserDocument } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {

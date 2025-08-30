@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { TokenService } from '../../modules/token/token.service';
 import { RoleService } from '../../modules/roles/role.service';
 import { User } from '../../modules/users/entities/user.entity';

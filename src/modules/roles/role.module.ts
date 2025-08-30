@@ -13,8 +13,8 @@ import {
   PermissionSchema,
 } from '../auth/entities/permission.entity';
 import { TokenModule } from '../token/token.module';
-import { AuthGuard } from 'src/common/guards/auth.guard';
-import { PermissionsGuard } from 'src/common/guards/permission.guard';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { PermissionsGuard } from '../../common/guards/permission.guard';
 
 @Module({
   imports: [
