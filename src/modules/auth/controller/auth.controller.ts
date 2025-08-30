@@ -45,7 +45,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ResponseMessage('Success')
   @UseGuards(AuthGuard, PermissionsGuard)
-  @Permissions()
   @ApiBearerAuth()
   @ApiSecurity('x-session-id')
   auth(@Req() request: IUserRequest) {

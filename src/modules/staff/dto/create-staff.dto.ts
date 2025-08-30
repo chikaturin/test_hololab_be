@@ -5,6 +5,7 @@ import {
   IsEmail,
   MinLength,
   IsNumber,
+  IsMongoId,
 } from 'class-validator';
 
 export class CreateStaffDto {
@@ -67,7 +68,7 @@ export class CreateStaffDto {
     required: true,
   })
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId({ message: 'departmentId must be a valid Mongo ObjectId' })
   departmentId: string;
 
   @ApiProperty({

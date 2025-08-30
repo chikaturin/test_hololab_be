@@ -22,7 +22,7 @@ export class Role extends Document {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: 'Permission', required: false })
+  @Prop({ type: Types.ObjectId, ref: 'Permissions', required: false })
   permissions: Types.ObjectId[];
 
   @Prop()

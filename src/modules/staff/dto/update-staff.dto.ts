@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDate, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsEmail,
+  IsMongoId,
+} from 'class-validator';
 
 export class UpdateStaffDto {
   @ApiProperty({
@@ -21,15 +27,6 @@ export class UpdateStaffDto {
   lastName: string;
 
   @ApiProperty({
-    description: 'Date of birth',
-    example: '1990-01-01',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsDate()
-  dob: Date;
-
-  @ApiProperty({
     description: 'Phone number',
     example: '1234567890',
     required: true,
@@ -37,6 +34,16 @@ export class UpdateStaffDto {
   @IsNotEmpty()
   @IsString()
   phone: string;
+
+  @ApiProperty({
+    description: 'Email address for user account',
+    example: 'john.doe@company.com',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail()
+  email: string;
 
   @ApiProperty({
     description: 'Salary',
@@ -62,6 +69,6 @@ export class UpdateStaffDto {
     required: true,
   })
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId({ message: 'departmentId must be a valid Mongo ObjectId' })
   departmentId: string;
 }

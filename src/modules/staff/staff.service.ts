@@ -2,15 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { CreateStaffDto, UpdateStaffDto } from './dto/index.dto';
 import { Staff } from './entities/staff.entities';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { hashPassword } from 'src/utils/bcrypt';
 import { User } from '../users/entities/user.entity';
+import { UserRole } from '../roles/entities/user-role.entity';
+import { RoleService } from '../roles/role.service';
 
 @Injectable()
 export class StaffService {
   constructor(
     @InjectModel(Staff.name) private staffModel: Model<Staff>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(UserRole.name) private userRoleModel: Model<UserRole>,
+    private readonly roleService: RoleService,
   ) {}
 
   async createStaff(createStaffDto: CreateStaffDto): Promise<string> {
@@ -20,7 +24,12 @@ export class StaffService {
       email: createStaffDto.email,
     });
     if (userMail) {
-      throw new Error('Mail already exists');
+      return 'Mail already exists';
+    }
+
+    const staffRole = await this.roleService.findRoleByName('Staff');
+    if (!staffRole) {
+      return 'Staff role not found';
     }
 
     const user = new this.userModel({
@@ -28,8 +37,15 @@ export class StaffService {
       password: await hashPassword(createStaffDto.password),
       staffId: staff._id,
     });
+
     await staff.save();
     await user.save();
+
+    await this.userRoleModel.create({
+      userId: user._id,
+      roleId: staffRole._id,
+      isActive: true,
+    });
 
     return 'Staff create Successfully';
   }
@@ -61,16 +77,44 @@ export class StaffService {
   }
 
   async getStaffById(id: string): Promise<Staff> {
-    const staff = await this.staffModel
-      .findById(id)
-      .populate('departmentId', 'name description');
+    const staff = await this.staffModel.findById(id);
     if (!staff) {
       throw new Error('Staff not found');
     }
-    return staff;
+    if (isValidObjectId(staff.departmentId)) {
+      await staff.populate('departmentId', 'name description');
+    }
+    const user = await this.userModel
+      .findOne({ staffId: staff._id })
+      .select('email');
+    const result: any = staff.toObject();
+    result.email = user?.email ?? result.email;
+    return result;
   }
 
   async getAllStaff(): Promise<Staff[]> {
-    return this.staffModel.find().populate('departmentId', 'name');
+    const staffs = await this.staffModel.find();
+    const validRefs = staffs.filter((s) => isValidObjectId(s.departmentId));
+    if (validRefs.length > 0) {
+      await this.staffModel.populate(validRefs, {
+        path: 'departmentId',
+        select: 'name',
+      });
+    }
+    const staffIds = staffs.map((s) => s._id);
+    const users = await this.userModel
+      .find({ staffId: { $in: staffIds as any } })
+      .select('email staffId');
+    const staffIdToEmail = new Map<string, string>();
+    users.forEach((u: any) => {
+      if (u.staffId) {
+        staffIdToEmail.set(String(u.staffId), u.email);
+      }
+    });
+    return staffs.map((s) => {
+      const obj: any = s.toObject();
+      obj.email = staffIdToEmail.get(String(s._id)) ?? obj.email;
+      return obj;
+    });
   }
 }
