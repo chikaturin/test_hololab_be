@@ -104,16 +104,21 @@ export class StaffService {
     const staffIds = staffs.map((s) => s._id);
     const users = await this.userModel
       .find({ staffId: { $in: staffIds as any } })
-      .select('email staffId');
+      .select('email staffId _id');
     const staffIdToEmail = new Map<string, string>();
+    const staffIdToUserId = new Map<string, string>();
+
     users.forEach((u: any) => {
       if (u.staffId) {
         staffIdToEmail.set(String(u.staffId), u.email);
+        staffIdToUserId.set(String(u.staffId), u._id.toString());
       }
     });
+
     return staffs.map((s) => {
       const obj: any = s.toObject();
       obj.email = staffIdToEmail.get(String(s._id)) ?? obj.email;
+      obj.userId = staffIdToUserId.get(String(s._id));
       return obj;
     });
   }

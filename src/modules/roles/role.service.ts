@@ -158,7 +158,7 @@ export class RoleService {
 
     return {
       ...role.toObject(),
-      usersCount, // Sử dụng usersCount thực tế thay vì hardcode 0
+      usersCount,
       permissionsCount: allPermissions.length,
       keyPermissions: allPermissions,
     };
@@ -178,7 +178,6 @@ export class RoleService {
     });
     if (!role) throw new NotFoundException('Role not found');
 
-    // Đồng bộ với bảng RolePermission nếu có permissions
     if (updateData.permissions) {
       await this.updateRolePermissions(
         id,
@@ -196,8 +195,35 @@ export class RoleService {
   }
 
   async assignRoleToUser(dto: AssignRoleDto): Promise<UserRole> {
-    const { userId, roleId } = dto;
-    const userRole = await this.userRoleModel.create({ userId, roleId });
+    const { userManager } = dto;
+    if (!userManager) {
+      throw new NotFoundException('User ID is required');
+    }
+
+    const findRoleManagement = await this.roleModel.findOne({
+      name: 'Manager',
+    });
+
+    if (!findRoleManagement) {
+      throw new NotFoundException('Role not found');
+    }
+
+    const existingUserRole = await this.userRoleModel.findOne({
+      userId: userManager,
+      roleId: findRoleManagement._id,
+      isActive: true,
+    });
+
+    if (existingUserRole) {
+      return existingUserRole;
+    }
+
+    const userRole = await this.userRoleModel.create({
+      userId: userManager,
+      roleId: findRoleManagement._id,
+      isActive: true,
+    });
+
     return userRole;
   }
 
@@ -252,20 +278,17 @@ export class RoleService {
     roleId: string,
     newPermissionIds: string[],
   ): Promise<void> {
-    // Cập nhật field permissions trong Role entity
     await this.roleModel.findByIdAndUpdate(
       roleId,
       { permissions: newPermissionIds.map((id) => new Types.ObjectId(id)) },
       { new: true },
     );
 
-    // Xóa tất cả permissions cũ trong bảng RolePermission
     await this.rolePermissionModel.updateMany(
       { roleId: new Types.ObjectId(roleId) },
       { isActive: false },
     );
 
-    // Thêm permissions mới vào bảng RolePermission
     if (newPermissionIds.length > 0) {
       const newRolePermissions = newPermissionIds.map((permissionId) => ({
         roleId: new Types.ObjectId(roleId),
