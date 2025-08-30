@@ -35,6 +35,7 @@ async function bootstrap() {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+
   const config = new DocumentBuilder()
     .setTitle('Test Hololab API')
     .setDescription('API documentation for Test Hololab project')
@@ -56,12 +57,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT || 3000;
+
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(
-    `🚀 Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
-  );
-  console.log(
-    `📚 Swagger documentation is available at: http://localhost:${process.env.PORT ?? 3000}/api`,
+    `📚 Swagger documentation is available at: http://localhost:${port}/api`,
   );
 
   try {
@@ -88,4 +90,11 @@ async function bootstrap() {
     module.hot.dispose(() => app.close());
   }
 }
-bootstrap();
+
+// For Vercel serverless functions
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap();
+}
+
+// Export for Vercel
+export default bootstrap;
