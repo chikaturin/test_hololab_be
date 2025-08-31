@@ -180,6 +180,7 @@ Most routes require authentication. Include the following headers:
 ### Staff Module
 
 - Staff member management
+- Password default: staff@123
 - Department assignment
 - Role-based permissions
 

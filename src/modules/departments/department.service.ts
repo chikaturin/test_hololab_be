@@ -91,6 +91,19 @@ export class DepartmentService {
     if (existingDepartment) {
       throw new ConflictException('Department with this name already exists');
     }
+
+    // Check if user is already a manager
+    if (createDepartmentDto.userManager) {
+      const isAlreadyManager = await this.roleService.isUserManager(
+        createDepartmentDto.userManager,
+      );
+      if (isAlreadyManager) {
+        throw new ConflictException(
+          'User is already a manager of another department',
+        );
+      }
+    }
+
     const newDepartment = new this.departmentModel(createDepartmentDto);
     const savedDepartment = await newDepartment.save();
 
@@ -107,22 +120,48 @@ export class DepartmentService {
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
-    const existingDepartment = await this.departmentModel.findByIdAndUpdate(
-      id,
-      updateDepartmentDto,
-      { new: true },
-    );
-    if (!existingDepartment) {
+    const oldDepartment = await this.departmentModel.findById(id);
+    if (!oldDepartment) {
       throw new NotFoundException('Department not found');
     }
 
     if (updateDepartmentDto.userManager) {
+      const isAlreadyManager = await this.roleService.isUserManager(
+        updateDepartmentDto.userManager,
+      );
+      if (isAlreadyManager) {
+        throw new ConflictException(
+          'User is already a manager of another department',
+        );
+      }
+
+      if (
+        (oldDepartment as any).userManager &&
+        (oldDepartment as any).userManager !== updateDepartmentDto.userManager
+      ) {
+        await this.roleService.deactivateUserManagerRole(
+          (oldDepartment as any).userManager,
+        );
+      }
+
       await this.roleService.assignRoleToUser({
         userManager: updateDepartmentDto.userManager,
       });
+    } else {
+      if ((oldDepartment as any).userManager) {
+        await this.roleService.deactivateUserManagerRole(
+          (oldDepartment as any).userManager,
+        );
+      }
     }
 
-    return existingDepartment;
+    const updatedDepartment = await this.departmentModel.findByIdAndUpdate(
+      id,
+      updateDepartmentDto,
+      { new: true },
+    );
+
+    return updatedDepartment as Department;
   }
 
   async deleteDepartment(id: string): Promise<void> {

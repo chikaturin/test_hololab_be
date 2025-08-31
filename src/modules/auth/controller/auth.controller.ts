@@ -9,10 +9,10 @@ import {
   UseGuards,
   Get,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import {
   ApiOperation,
   ApiTags,
+  ApiResponse,
   ApiBearerAuth,
   ApiHeader,
   ApiSecurity,
@@ -25,7 +25,7 @@ import {
   LoginDto,
   RefreshTokenDto,
   LogoutDto,
-  AuthResponseDto,
+  ChangePasswordDto,
 } from '../dto/index.dto';
 import { AuthGuard } from '../../../common/guards/auth.guard';
 import { PermissionsGuard } from '../../../common/guards/permission.guard';
@@ -48,19 +48,19 @@ export class AuthController {
   @ApiSecurity('x-session-id')
   auth(@Req() request: IUserRequest) {
     const user = request.user as any;
-    return plainToInstance(
-      AuthResponseDto,
-      {
-        ...user,
-        userRoles: user.userRoles?.map((ur) => ({
-          role: {
-            name: ur.role?.name,
-            _idRole: ur.role?._id || ur.roleId?.toString(),
-          },
-        })),
-      },
-      { excludeExtraneousValues: true },
-    );
+
+    const result = {
+      ...user,
+      userRoles: user.userRoles?.map((ur) => ({
+        role: {
+          name: ur.role?.name,
+          _idRole: ur.role?._id || ur.roleId?.toString(),
+        },
+      })),
+    };
+
+    console.log('Final result._id:', result._id);
+    return result;
   }
 
   // @Post('register')
@@ -129,5 +129,21 @@ export class AuthController {
   async logout(@Req() request: any, @Body() body: LogoutDto) {
     await this.authService.logout(request.user.id, body.sessionId);
     return { message: 'Logged out successfully' };
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ResponseMessage('Password changed successfully')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  async changePassword(
+    @Req() request: IUserRequest,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const userId = request.user._id || request.user.id;
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 }

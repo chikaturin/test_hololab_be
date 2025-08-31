@@ -103,12 +103,43 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const UserRole = this.userModel.db.collection('userroles');
-    const userRoles = await UserRole.find({ userId }).toArray();
+    const UserRole = this.userModel.db.collection('user_roles');
+    const Role = this.userModel.db.collection('roles');
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { ObjectId } = require('mongodb');
+    const userObjectId = new ObjectId(userId);
+
+    console.log('=== findOneByIdWithRoles Debug ===');
+    console.log('userId:', userId);
+    console.log('userObjectId:', userObjectId);
+
+    const userRoles = await UserRole.find({
+      userId: userObjectId,
+      isActive: true,
+    }).toArray();
+
+    console.log('userRoles found (isActive: true):', userRoles);
+
+    // Populate role information for each userRole (same format as auth endpoint)
+    const populatedUserRoles = await Promise.all(
+      userRoles.map(async (userRole) => {
+        const role = await Role.findOne({ _id: new ObjectId(userRole.roleId) });
+        console.log('Role found for userRole:', userRole._id, ':', role);
+        return {
+          role: {
+            name: role?.name,
+            _idRole: role?._id?.toString() || userRole.roleId?.toString(),
+          },
+        };
+      }),
+    );
+
+    console.log('Final populatedUserRoles:', populatedUserRoles);
 
     return {
       ...user.toObject(),
-      userRoles,
+      userRoles: populatedUserRoles,
     };
   }
 }

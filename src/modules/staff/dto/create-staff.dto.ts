@@ -4,7 +4,6 @@ import {
   IsString,
   IsEmail,
   MinLength,
-  IsNumber,
   IsMongoId,
 } from 'class-validator';
 
@@ -41,7 +40,6 @@ export class CreateStaffDto {
     required: true,
   })
   @IsNotEmpty()
-  @IsNumber()
   salary: number;
 
   @ApiProperty({

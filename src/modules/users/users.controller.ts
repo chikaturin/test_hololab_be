@@ -13,6 +13,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiSecurity,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
@@ -96,5 +97,15 @@ export class UsersController {
   @ResponseMessage('Users fetched by department successfully')
   findByDepartment(@Param('departmentId') departmentId: string) {
     return this.usersService.findByDepartment(departmentId);
+  }
+
+  @Get(':id/with-roles')
+  @ApiOperation({ summary: 'Get a user by ID with roles' })
+  @ApiResponse({ status: 200, description: 'User with roles found' })
+  @ApiBearerAuth()
+  @ApiSecurity('x-session-id')
+  @ResponseMessage('User with roles fetched successfully')
+  findOneWithRoles(@Param('id') id: string) {
+    return this.usersService.findOneByIdWithRoles(id);
   }
 }

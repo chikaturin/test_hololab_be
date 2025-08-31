@@ -30,7 +30,13 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.tokenService.verifyToken(token, sessionId);
+      console.log('=== AuthGuard Debug ===');
+      console.log('payload.userId:', payload.userId);
+
       const user = await this.roleService.findUserWithRoles(payload.userId);
+      console.log('user._id:', user?._id);
+      console.log('user.email:', user?.email);
+
       if (!user || user.isActive === false) {
         throw new UnauthorizedException('User not found');
       }

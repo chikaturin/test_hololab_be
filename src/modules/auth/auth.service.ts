@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Permissions, PermissionDocument } from './entities/index.entities';
 import { hashPassword, comparePassword } from '../../utils/bcrypt';
 import { TokenService } from '../token/token.service';
@@ -186,5 +187,47 @@ export class AuthService {
 
   async getAllPermissions(): Promise<Permissions[]> {
     return this.permissionModel.find();
+  }
+
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCurrentPasswordValid = await comparePassword(
+      changePasswordDto.currentPassword,
+      user.password,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    if (changePasswordDto.newPassword !== changePasswordDto.confirmPassword) {
+      throw new UnauthorizedException(
+        'New password and confirmation do not match',
+      );
+    }
+
+    const isNewPasswordSame = await comparePassword(
+      changePasswordDto.newPassword,
+      user.password,
+    );
+    if (isNewPasswordSame) {
+      throw new UnauthorizedException(
+        'New password must be different from current password',
+      );
+    }
+
+    const hashedNewPassword = await hashPassword(changePasswordDto.newPassword);
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedNewPassword,
+      updatedAt: new Date(),
+    });
+
+    return { message: 'Password changed successfully' };
   }
 }

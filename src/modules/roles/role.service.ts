@@ -105,7 +105,7 @@ export class RoleService {
     const [role, rolePerms] = await Promise.all([
       this.roleModel.findById(id),
       this.rolePermissionModel
-        .find({ roleId: id, isActive: true })
+        .find({ roleId: new Types.ObjectId(id), isActive: true })
         .populate('permissionId', 'name module')
         .lean(),
     ]);
@@ -201,30 +201,86 @@ export class RoleService {
       throw new NotFoundException('User ID is required');
     }
 
+    console.log('=== assignRoleToUser Debug ===');
+    console.log('userManager:', userManager);
+
     const findRoleManagement = await this.roleModel.findOne({
-      name: 'Manager',
+      roleType: 'manager',
     });
+
+    console.log('=== Role Search Debug ===');
+    console.log('Searching for roleType: manager');
+    console.log('Manager role found:', findRoleManagement);
 
     if (!findRoleManagement) {
       throw new NotFoundException('Role not found');
     }
 
-    const existingUserRole = await this.userRoleModel.findOne({
-      userId: userManager,
-      roleId: findRoleManagement._id,
-      isActive: true,
-    });
+    console.log('Manager role ID:', findRoleManagement._id);
 
-    if (existingUserRole) {
-      return existingUserRole;
+    const existingUserRoles = await this.userRoleModel
+      .find({
+        userId: userManager,
+      })
+      .lean();
+
+    console.log('=== Force Query Debug ===');
+    console.log('Query filter:', { userId: userManager });
+    console.log('Raw query result:', existingUserRoles);
+
+    console.log('All existing user roles found:', existingUserRoles.length);
+    console.log(
+      'All existing role IDs:',
+      existingUserRoles.map((ur) => ur._id),
+    );
+    console.log(
+      'All existing role details:',
+      existingUserRoles.map((ur) => ({
+        _id: ur._id,
+        roleId: ur.roleId,
+        isActive: ur.isActive,
+        createdAt: ur.createdAt,
+      })),
+    );
+
+    if (existingUserRoles.length > 0) {
+      const roleIds = existingUserRoles.map((ur) => ur._id);
+      console.log('Deactivating ALL role IDs:', roleIds);
+
+      const updateResult = await this.userRoleModel.updateMany(
+        { _id: { $in: roleIds } },
+        { isActive: false, updatedAt: new Date() },
+      );
+
+      console.log('Update result:', updateResult);
     }
 
+    console.log('=== Checking for existing Manager role ===');
+    const existingManagerRole = await this.userRoleModel.findOne({
+      userId: userManager,
+      roleId: findRoleManagement._id,
+    });
+
+    console.log('Existing Manager role found:', existingManagerRole);
+
+    if (existingManagerRole) {
+      console.log('Reactivating existing Manager role...');
+      await this.userRoleModel.findByIdAndUpdate(existingManagerRole._id, {
+        isActive: true,
+        updatedAt: new Date(),
+      });
+      console.log('Manager role reactivated successfully');
+      return existingManagerRole;
+    }
+
+    console.log('=== Creating new Manager role ===');
     const userRole = await this.userRoleModel.create({
       userId: userManager,
       roleId: findRoleManagement._id,
       isActive: true,
     });
 
+    console.log('New Manager role created:', userRole);
     return userRole;
   }
 
@@ -250,11 +306,23 @@ export class RoleService {
     });
     if (!user) return null;
 
-    const userRoles = await this.userRoleModel.find({ userId }).lean();
+    // Convert userId to ObjectId for proper querying
+    const userObjectId = new Types.ObjectId(userId);
+
+    console.log('=== findUserWithRoles Debug ===');
+    console.log('userId:', userId);
+    console.log('userObjectId:', userObjectId);
+
+    const userRoles = await this.userRoleModel
+      .find({ userId: userObjectId, isActive: true })
+      .lean();
+
+    console.log('userRoles found (isActive: true):', userRoles);
 
     const populatedUserRoles = await Promise.all(
       userRoles.map(async (userRole) => {
         const role = await this.roleModel.findById(userRole.roleId).lean();
+        console.log('Role found for userRole:', userRole._id, ':', role);
         return {
           ...userRole,
           role: role
@@ -267,6 +335,8 @@ export class RoleService {
         };
       }),
     );
+
+    console.log('Final populatedUserRoles:', populatedUserRoles);
 
     return {
       ...user,
@@ -350,5 +420,39 @@ export class RoleService {
         (role._id as Types.ObjectId).toString(),
       );
     }
+  }
+
+  async isUserManager(userId: string): Promise<boolean> {
+    const userRoles = await this.userRoleModel.find({
+      userId: new Types.ObjectId(userId),
+    });
+    if (userRoles.length === 0) return false;
+
+    const roleIds = userRoles.map((ur) => ur.roleId);
+
+    const roles = await this.roleModel.find({
+      _id: { $in: roleIds },
+      roleType: 'manager',
+    });
+
+    return roles.length > 0;
+  }
+
+  async deactivateUserManagerRole(userId: string): Promise<void> {
+    // Find and deactivate manager role for user
+    const managerRole = await this.roleModel.findOne({ name: 'Manager' });
+    if (!managerRole) return;
+
+    await this.userRoleModel.updateMany(
+      {
+        userId: new Types.ObjectId(userId),
+        roleId: managerRole._id,
+        isActive: true,
+      },
+      {
+        isActive: false,
+        updatedAt: new Date(),
+      },
+    );
   }
 }
