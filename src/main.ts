@@ -2,13 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import { PermissionsGuard } from './common/guards/permission.guard';
-import { AuthGuard } from './common/guards/auth.guard';
 import helmet from 'helmet';
+import { Handler, NextFunction } from 'express';
+
 declare const module: any;
 
-async function bootstrap() {
+async function createApp() {
   const app = await NestFactory.create(AppModule);
+
   app.setGlobalPrefix('api');
   app.use(cookieParser());
   app.use(
@@ -57,39 +58,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // Debug environment variables
-  console.log('🔧 Environment variables:');
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('PORT:', process.env.PORT);
-  console.log('REDIS_HOST:', process.env.REDIS_HOST ? 'Set' : 'Not set');
-  console.log('REDIS_PORT:', process.env.REDIS_PORT);
-  console.log('REDIS_USERNAME:', process.env.REDIS_USERNAME);
-  console.log(
-    'REDIS_PASSWORD:',
-    process.env.REDIS_PASSWORD ? 'Set' : 'Not set',
-  );
+  return app;
+}
 
-  // Validate and set port
-  let port = 3000; // Default port
-  if (process.env.PORT) {
-    const envPort = parseInt(process.env.PORT);
-    if (envPort >= 0 && envPort < 65536) {
-      port = envPort;
-    } else {
-      console.warn(
-        `⚠️ Invalid PORT value: ${process.env.PORT}. Using default port 3000`,
-      );
-    }
-  }
+async function bootstrap() {
+  const app = await createApp();
 
-  console.log(`🚀 Starting application on port: ${port}`);
-
+  const port = parseInt(process.env.PORT || '3000', 10);
   await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(
-    `📚 Swagger documentation is available at: http://localhost:${port}/api`,
-  );
+  console.log(`🚀 Application running on: http://localhost:${port}`);
+  console.log(`📚 Swagger docs: http://localhost:${port}/api`);
 
   if (module.hot) {
     module.hot.accept();
@@ -97,10 +76,19 @@ async function bootstrap() {
   }
 }
 
-// For Vercel serverless functions
+// ✅ Local/dev thì chạy listen
 if (process.env.NODE_ENV !== 'production') {
   bootstrap();
 }
 
-// Export for Vercel
-export default bootstrap;
+// ✅ Production (Vercel) → export handler
+let cachedHandler: Handler;
+export default async function handler(req: any, res: any) {
+  if (!cachedHandler) {
+    const app = await createApp();
+    await app.init();
+    cachedHandler = app.getHttpAdapter().getInstance();
+  }
+  const next: NextFunction = () => {};
+  return cachedHandler(req, res, next);
+}
