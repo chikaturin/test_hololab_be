@@ -57,7 +57,30 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3000;
+  // Debug environment variables
+  console.log('🔧 Environment variables:');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('PORT:', process.env.PORT);
+  console.log('REDIS_HOST:', process.env.REDIS_HOST ? 'Set' : 'Not set');
+  console.log('REDIS_PORT:', process.env.REDIS_PORT);
+  console.log('REDIS_USERNAME:', process.env.REDIS_USERNAME);
+  console.log(
+    'REDIS_PASSWORD:',
+    process.env.REDIS_PASSWORD ? 'Set' : 'Not set',
+  );
+
+  // Validate and set port
+  let port = 3000; // Default port
+  if (process.env.PORT) {
+    const envPort = parseInt(process.env.PORT);
+    if (envPort >= 0 && envPort < 65536) {
+      port = envPort;
+    } else {
+      console.warn(`⚠️ Invalid PORT value: ${process.env.PORT}. Using default port 3000`);
+    }
+  }
+  
+  console.log(`🚀 Starting application on port: ${port}`);
 
   await app.listen(port, '0.0.0.0');
 

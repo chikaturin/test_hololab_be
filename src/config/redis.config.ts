@@ -26,10 +26,10 @@ export const getRedisConfig = (
         lazyConnect: true,
         connectTimeout: 5000,
         commandTimeout: 3000,
-        // Limit connections to prevent max clients error
-        maxRetriesPerRequest: 1,
+        // Aggressive connection limiting to prevent max clients error
+        maxRetriesPerRequest: 0,
         enableOfflineQueue: false,
-        // Connection pooling
+        // Connection pooling and management
         family: 4,
         keepAlive: 30000,
         noDelay: true,
@@ -48,10 +48,10 @@ export const getRedisConfig = (
       lazyConnect: true,
       connectTimeout: 10000,
       commandTimeout: 5000,
-      // Limit connections to prevent max clients error
-      maxRetriesPerRequest: 1,
+      // Aggressive connection limiting to prevent max clients error
+      maxRetriesPerRequest: 0,
       enableOfflineQueue: false,
-      // Connection pooling
+      // Connection pooling and management
       family: 4,
       keepAlive: 30000,
       noDelay: true,
