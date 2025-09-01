@@ -8,8 +8,10 @@ import { TokenService } from './token.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: '60s' },
+        secret: configService.get<string>('JWT_SECRET_AT'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRATION_AT') || '1d',
+        },
       }),
       inject: [ConfigService],
     }),

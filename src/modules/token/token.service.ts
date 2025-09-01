@@ -163,10 +163,13 @@ export class TokenService {
     const secret = isRefreshToken
       ? this.configService.get<string>('JWT_SECRET_RT')
       : this.configService.get<string>('JWT_SECRET_AT');
+    const ignoreExpiration =
+      this.configService.get<string>('JWT_IGNORE_EXPIRATION') === 'true';
 
     try {
       const payload = await this.jwtService.verifyAsync<TokenPayload>(token, {
         secret,
+        ignoreExpiration,
       });
       const session = await this.getUserSession(payload.userId, sessionId);
       if (session.revoked) {
