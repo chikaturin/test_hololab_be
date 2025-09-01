@@ -26,6 +26,13 @@ export const getRedisConfig = (
         lazyConnect: true,
         connectTimeout: 5000,
         commandTimeout: 3000,
+        // Limit connections to prevent max clients error
+        maxRetriesPerRequest: 1,
+        enableOfflineQueue: false,
+        // Connection pooling
+        family: 4,
+        keepAlive: 30000,
+        noDelay: true,
       },
     };
   }
@@ -41,6 +48,13 @@ export const getRedisConfig = (
       lazyConnect: true,
       connectTimeout: 10000,
       commandTimeout: 5000,
+      // Limit connections to prevent max clients error
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      // Connection pooling
+      family: 4,
+      keepAlive: 30000,
+      noDelay: true,
     },
   };
 };
