@@ -76,10 +76,12 @@ async function bootstrap() {
     if (envPort >= 0 && envPort < 65536) {
       port = envPort;
     } else {
-      console.warn(`⚠️ Invalid PORT value: ${process.env.PORT}. Using default port 3000`);
+      console.warn(
+        `⚠️ Invalid PORT value: ${process.env.PORT}. Using default port 3000`,
+      );
     }
   }
-  
+
   console.log(`🚀 Starting application on port: ${port}`);
 
   await app.listen(port, '0.0.0.0');
