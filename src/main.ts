@@ -66,25 +66,6 @@ async function bootstrap() {
     `📚 Swagger documentation is available at: http://localhost:${port}/api`,
   );
 
-  try {
-    const Redis = require('ioredis');
-    const redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD || '',
-    });
-
-    const ping = await redis.ping();
-    if (ping === 'PONG') {
-      console.log('✅ Redis connected successfully');
-    } else {
-      console.log('❌ Redis connection failed');
-    }
-    await redis.disconnect();
-  } catch (error) {
-    console.log('❌ Redis connection check failed:', error.message);
-  }
-
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
