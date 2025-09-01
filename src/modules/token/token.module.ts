@@ -12,6 +12,10 @@ import { TokenService } from './token.service';
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRATION_AT') || '1d',
         },
+        verifyOptions: {
+          ignoreExpiration:
+            configService.get<string>('JWT_IGNORE_EXPIRATION') === 'true',
+        },
       }),
       inject: [ConfigService],
     }),

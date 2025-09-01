@@ -165,12 +165,17 @@ export class TokenService {
       : this.configService.get<string>('JWT_SECRET_AT');
     const ignoreExpiration =
       this.configService.get<string>('JWT_IGNORE_EXPIRATION') === 'true';
+    const disableSessionCheck =
+      this.configService.get<string>('JWT_DISABLE_SESSION_CHECK') === 'true';
 
     try {
       const payload = await this.jwtService.verifyAsync<TokenPayload>(token, {
         secret,
         ignoreExpiration,
       });
+      if (disableSessionCheck || !sessionId) {
+        return payload;
+      }
       const session = await this.getUserSession(payload.userId, sessionId);
       if (session.revoked) {
         throw new UnauthorizedException('Session has been revoked');
