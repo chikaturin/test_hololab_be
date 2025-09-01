@@ -10,11 +10,11 @@ export const getRedisConfig = (
   const password = configService.get('REDIS_PASSWORD');
   const db = configService.get('REDIS_DB');
 
-  // For Vercel deployment, ensure all required Redis config is present
   if (!host || !port || !password) {
     console.warn(
       '⚠️ Redis configuration incomplete. Redis module may not work properly.',
     );
+
     return {
       type: 'single',
       options: {
@@ -24,6 +24,8 @@ export const getRedisConfig = (
         password: password || '',
         db: db || 0,
         lazyConnect: true,
+        connectTimeout: 5000,
+        commandTimeout: 3000,
       },
     };
   }

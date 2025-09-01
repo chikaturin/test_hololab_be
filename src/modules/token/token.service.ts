@@ -22,7 +22,18 @@ export class TokenService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.redisClient = createClient(getRedisCloudConfig(this.configService));
+    const redisConfig = getRedisCloudConfig(this.configService);
+    if (redisConfig) {
+      this.redisClient = createClient(redisConfig);
+    } else {
+      console.warn('⚠️ Redis Cloud config not available, using fallback');
+      this.redisClient = createClient({
+        socket: {
+          host: 'localhost',
+          port: 6379,
+        },
+      });
+    }
 
     this.redisClient.on('error', (err) => {
       console.log('Redis Client Error', err);

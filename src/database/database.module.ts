@@ -15,7 +15,36 @@ import { getRedisConfig } from '../config/redis.config';
     RedisModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getRedisConfig,
+      useFactory: (configService: ConfigService) => {
+        try {
+          const redisConfig = getRedisConfig(configService);
+
+          if (redisConfig.type === 'single' && redisConfig.options) {
+            console.log('🔧 Redis configuration loaded:', {
+              host: redisConfig.options.host,
+              port: redisConfig.options.port,
+              username: redisConfig.options.username,
+              hasPassword: !!redisConfig.options.password,
+            });
+          }
+
+          return redisConfig;
+        } catch (error) {
+          console.error(
+            '❌ Failed to load Redis configuration:',
+            error.message,
+          );
+
+          return {
+            type: 'single',
+            options: {
+              host: 'localhost',
+              port: 6379,
+              lazyConnect: true,
+            },
+          };
+        }
+      },
     }),
   ],
 })
